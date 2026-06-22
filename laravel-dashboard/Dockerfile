@@ -72,4 +72,4 @@ RUN set -e; \
 
 EXPOSE $PORT
 
-CMD ["sh", "-c", "php artisan storage:link 2>/dev/null; php artisan migrate --force 2>/dev/null; php -S 0.0.0.0:$PORT -t public"]
+CMD ["sh", "-c", "php artisan storage:link 2>/dev/null; php artisan migrate --force --seed 2>/dev/null; php -S 0.0.0.0:$PORT -t public"]
