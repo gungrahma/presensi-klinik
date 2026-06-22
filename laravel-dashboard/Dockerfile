@@ -34,22 +34,41 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-progress \
     && npm ci --no-audit --no-fund --legacy-peer-deps \
     && npm run build \
     && php artisan vendor:publish --all --force --no-interaction \
-    && php artisan storage:link || true \
-    && for pkg in $(ls vendor/filament/ 2>/dev/null); do \
+    && composer dump-autoload --optimize --no-scripts
+
+RUN php artisan storage:link 2>&1 || echo "storage:link skipped (likely already exists)"
+
+RUN set -e; \
+    for pkg in $(ls vendor/filament/ 2>/dev/null); do \
         if [ -d "vendor/filament/$pkg/dist" ]; then \
+            echo "Processing filament/$pkg..."; \
             mkdir -p public/css/filament/$pkg public/js/filament/$pkg public/fonts/filament/$pkg; \
             if [ -f "vendor/filament/$pkg/dist/theme.css" ]; then \
                 cp vendor/filament/$pkg/dist/theme.css public/css/filament/$pkg/app.css; \
+                echo "  + theme.css -> app.css"; \
             elif [ -f "vendor/filament/$pkg/dist/index.css" ]; then \
                 cp vendor/filament/$pkg/dist/index.css public/css/filament/$pkg/app.css; \
+                echo "  + index.css -> app.css"; \
             fi; \
-            [ -f "vendor/filament/$pkg/dist/index.js" ] && cp vendor/filament/$pkg/dist/index.js public/js/filament/$pkg/app.js; \
-            [ -f "vendor/filament/$pkg/dist/echo.js" ] && cp vendor/filament/$pkg/dist/echo.js public/js/filament/$pkg/echo.js; \
-            [ -d "vendor/filament/$pkg/dist/components" ] && cp -r vendor/filament/$pkg/dist/components public/js/filament/$pkg/; \
-            [ -d "vendor/filament/$pkg/dist/fonts" ] && cp -r vendor/filament/$pkg/dist/fonts/. public/fonts/filament/$pkg/; \
+            if [ -f "vendor/filament/$pkg/dist/index.js" ]; then \
+                cp vendor/filament/$pkg/dist/index.js public/js/filament/$pkg/app.js; \
+                echo "  + index.js -> app.js"; \
+            fi; \
+            if [ -f "vendor/filament/$pkg/dist/echo.js" ]; then \
+                cp vendor/filament/$pkg/dist/echo.js public/js/filament/$pkg/echo.js; \
+                echo "  + echo.js -> echo.js"; \
+            fi; \
+            if [ -d "vendor/filament/$pkg/dist/components" ]; then \
+                cp -r vendor/filament/$pkg/dist/components public/js/filament/$pkg/; \
+                echo "  + components/"; \
+            fi; \
+            if [ -d "vendor/filament/$pkg/dist/fonts" ]; then \
+                cp -r vendor/filament/$pkg/dist/fonts/. public/fonts/filament/$pkg/; \
+                echo "  + fonts/"; \
+            fi; \
         fi; \
-    done \
-    && composer dump-autoload --optimize --no-scripts
+    done; \
+    echo "Filament assets done."
 
 EXPOSE $PORT
 
