@@ -21,6 +21,15 @@ WORKDIR /app
 
 COPY . .
 
+RUN mkdir -p \
+    storage/framework/cache/data \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/framework/testing \
+    storage/logs \
+    bootstrap/cache \
+    && chmod -R 775 storage bootstrap/cache
+
 RUN composer install --no-dev --optimize-autoloader --no-scripts --no-progress \
     && npm ci --no-audit --no-fund --legacy-peer-deps \
     && npm run build \
