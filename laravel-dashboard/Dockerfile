@@ -33,6 +33,7 @@ RUN mkdir -p \
 RUN composer install --no-dev --optimize-autoloader --no-scripts --no-progress \
     && npm ci --no-audit --no-fund --legacy-peer-deps \
     && npm run build \
+    && php artisan vendor:publish --tag=filament-assets --force --no-interaction \
     && php artisan storage:link || true \
     && composer dump-autoload --optimize --no-scripts
 
