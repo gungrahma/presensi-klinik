@@ -51,8 +51,9 @@ RUN set -e; \
                 echo "  + index.css -> app.css"; \
             fi; \
             if [ -f "vendor/filament/$pkg/dist/index.js" ]; then \
+                cp vendor/filament/$pkg/dist/index.js public/js/filament/$pkg/$pkg.js; \
                 cp vendor/filament/$pkg/dist/index.js public/js/filament/$pkg/app.js; \
-                echo "  + index.js -> app.js"; \
+                echo "  + index.js -> $pkg.js + app.js"; \
             fi; \
             if [ -f "vendor/filament/$pkg/dist/echo.js" ]; then \
                 cp vendor/filament/$pkg/dist/echo.js public/js/filament/$pkg/echo.js; \
