@@ -38,9 +38,15 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-progress \
     && for pkg in $(ls vendor/filament/ 2>/dev/null); do \
         if [ -d "vendor/filament/$pkg/dist" ]; then \
             mkdir -p public/css/filament/$pkg public/js/filament/$pkg public/fonts/filament/$pkg; \
-            cp -r vendor/filament/$pkg/dist/css/. public/css/filament/$pkg/ 2>/dev/null || true; \
-            cp -r vendor/filament/$pkg/dist/js/. public/js/filament/$pkg/ 2>/dev/null || true; \
-            cp -r vendor/filament/$pkg/dist/fonts/. public/fonts/filament/$pkg/ 2>/dev/null || true; \
+            if [ -f "vendor/filament/$pkg/dist/theme.css" ]; then \
+                cp vendor/filament/$pkg/dist/theme.css public/css/filament/$pkg/app.css; \
+            elif [ -f "vendor/filament/$pkg/dist/index.css" ]; then \
+                cp vendor/filament/$pkg/dist/index.css public/css/filament/$pkg/app.css; \
+            fi; \
+            [ -f "vendor/filament/$pkg/dist/index.js" ] && cp vendor/filament/$pkg/dist/index.js public/js/filament/$pkg/app.js; \
+            [ -f "vendor/filament/$pkg/dist/echo.js" ] && cp vendor/filament/$pkg/dist/echo.js public/js/filament/$pkg/echo.js; \
+            [ -d "vendor/filament/$pkg/dist/components" ] && cp -r vendor/filament/$pkg/dist/components public/js/filament/$pkg/; \
+            [ -d "vendor/filament/$pkg/dist/fonts" ] && cp -r vendor/filament/$pkg/dist/fonts/. public/fonts/filament/$pkg/; \
         fi; \
     done \
     && composer dump-autoload --optimize --no-scripts
