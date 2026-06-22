@@ -19,15 +19,11 @@ RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
 
 WORKDIR /app
 
-COPY composer.json composer.lock ./
-RUN composer install --no-dev --optimize-autoloader --no-scripts --no-progress
-
-COPY package.json package-lock.json ./
-RUN npm install --no-audit --no-fund --legacy-peer-deps
-
 COPY . .
 
-RUN npm run build \
+RUN composer install --no-dev --optimize-autoloader --no-scripts --no-progress \
+    && npm ci --no-audit --no-fund --legacy-peer-deps \
+    && npm run build \
     && php artisan storage:link || true \
     && composer dump-autoload --optimize --no-scripts
 
