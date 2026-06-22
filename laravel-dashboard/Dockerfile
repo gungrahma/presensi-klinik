@@ -35,6 +35,14 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts --no-progress \
     && npm run build \
     && php artisan vendor:publish --all --force --no-interaction \
     && php artisan storage:link || true \
+    && for pkg in $(ls vendor/filament/ 2>/dev/null); do \
+        if [ -d "vendor/filament/$pkg/dist" ]; then \
+            mkdir -p public/css/filament/$pkg public/js/filament/$pkg public/fonts/filament/$pkg; \
+            cp -r vendor/filament/$pkg/dist/css/. public/css/filament/$pkg/ 2>/dev/null || true; \
+            cp -r vendor/filament/$pkg/dist/js/. public/js/filament/$pkg/ 2>/dev/null || true; \
+            cp -r vendor/filament/$pkg/dist/fonts/. public/fonts/filament/$pkg/ 2>/dev/null || true; \
+        fi; \
+    done \
     && composer dump-autoload --optimize --no-scripts
 
 EXPOSE $PORT
